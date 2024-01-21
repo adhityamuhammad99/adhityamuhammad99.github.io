@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Redaman FTTH</title>
+    <style>
+        body {
+            font-family: 'Helvetica', sans-serif;
+            background-color: #1e3b4d;
+            color: white;
+            margin: 20px;
+        }
+        label {
+            display: block;
+            margin: 10px 0;
+        }
+        input {
+            width: 100%;
+            padding: 5px;
+            margin: 5px 0;
+        }
+        button {
+            background-color: #00bcd4;
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+        }
+        button.reset {
+            background-color: #ff5722;
+        }
+        #result {
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        #category {
+            margin-top: 10px;
+        }
+        .green {
+            color: green;
+        }
+        .orange {
+            color: orange;
+        }
+        .red {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+    <label for="panjang_olt_odc">Panjang Kabel OLT-ODC (km):</label>
+    <input type="text" id="panjang_olt_odc">
+
+    <label for="panjang_odc_odp">Panjang Kabel ODC-ODP (km):</label>
+    <input type="text" id="panjang_odc_odp">
+
+    <label for="panjang_odp_onu">Panjang Kabel ODP-ONU (km):</label>
+    <input type="text" id="panjang_odp_onu">
+
+    <label for="jumlah_splice">Jumlah Splice:</label>
+    <input type="text" id="jumlah_splice">
+
+    <label for="redaman_per_splice">Redaman Per Splice (dB):</label>
+    <input type="text" id="redaman_per_splice">
+
+    <label for="selected_redaman">Pilih Redaman Kabel:</label>
+    <select id="selected_redaman">
+        <option value="0.35">0.35</option>
+        <option value="0.22">0.22</option>
+    </select>
+
+    <button onclick="hitung_redaman()">Hitung Redaman</button>
+    <button class="reset" onclick="reset_input()">Reset</button>
+
+    <div id="result">Redaman Total: </div>
+    <div id="category"></div>
+
+    <script>
+        function hitung_redaman() {
+            try {
+                // Get input values
+                var panjang_kabel_olt_odc = parseFloat(document.getElementById('panjang_olt_odc').value);
+                var panjang_kabel_odc_odp = parseFloat(document.getElementById('panjang_odc_odp').value);
+                var panjang_kabel_odp_onu = parseFloat(document.getElementById('panjang_odp_onu').value);
+                var jumlah_splice = parseInt(document.getElementById('jumlah_splice').value);
+                var redaman_per_splice = parseFloat(document.getElementById('redaman_per_splice').value);
+
+                // Initialize redaman_kabel coefficient
+                var redaman_kabel = parseFloat(document.getElementById('selected_redaman').value);
+
+                // Redaman Kabel OLT-ODC
+                var redaman_kabel_olt_odc = panjang_kabel_olt_odc * redaman_kabel;
+
+                // Redaman Kabel ODC-ODP
+                var redaman_kabel_odc_odp = panjang_kabel_odc_odp * redaman_kabel;
+
+                // Redaman Kabel ODP-ONU
+                var redaman_kabel_odp_onu = panjang_kabel_odp_onu * redaman_kabel;
+
+                // Redaman Splitter
+                var redaman_splitter_odc = 7.8;
+                var redaman_splitter_odp = 11;
+
+                // Redaman Splice Total
+                var redaman_splice_total = jumlah_splice * redaman_per_splice;
+
+                // Calculate total redaman
+                var redaman_total = redaman_kabel_olt_odc + redaman_kabel_odc_odp + redaman_kabel_odp_onu + redaman_splitter_odc + redaman_splitter_odp + redaman_splice_total;
+
+                // Display the result
+                document.getElementById('result').innerText = "Redaman Total: " + redaman_total + " dB";
+
+                // Categorize based on range
+                var categoryElement = document.getElementById('category');
+                if (15 <= redaman_total && redaman_total <= 28) {
+                    categoryElement.innerText = "Dalam Range Redaman Yang Baik";
+                    categoryElement.className = "green";
+                } else if (28 < redaman_total && redaman_total <= 41) {
+                    categoryElement.innerText = "Dalam Range Redaman Yang Kurang Baik";
+                    categoryElement.className = "orange";
+                } else {
+                    categoryElement.innerText = "Dalam Range Redaman Yang Buruk";
+                    categoryElement.className = "red";
+                }
+            } catch (error) {
+                document.getElementById('result').innerText = "Masukkan nilai yang valid untuk panjang kabel, jumlah splice, dan redaman per splice.";
+                document.getElementById('category').innerText = "";
+            }
+        }
+
+        function reset_input() {
+            // Clear all inputs
+            document.getElementById('panjang_olt_odc').value = "";
+            document.getElementById('panjang_odc_odp').value = "";
+            document.getElementById('panjang_odp_onu').value = "";
+            document.getElementById('jumlah_splice').value = "";
+            document.getElementById('redaman_per_splice').value = "";
+
+            // Reset result labels
+            document.getElementById('result').innerText = "Redaman Total: ";
+            document.getElementById('category').innerText = "";
+            document.getElementById('category').className = "";
+        }
+    </script>
+
+</body>
+</html>
